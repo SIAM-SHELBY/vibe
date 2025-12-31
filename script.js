@@ -12,10 +12,13 @@ document.addEventListener('DOMContentLoaded', function() {
     // Update clock every second
     function updateClock() {
         const now = new Date();
-        const hours = now.getHours().toString().padStart(2, '0');
+        let hours = now.getHours();
         const minutes = now.getMinutes().toString().padStart(2, '0');
         const seconds = now.getSeconds().toString().padStart(2, '0');
-        clock.textContent = `${hours}:${minutes}:${seconds}`;
+        const ampm = hours >= 12 ? 'PM' : 'AM';
+        hours = hours % 12;
+        hours = hours ? hours : 12; // the hour '0' should be '12'
+        clock.textContent = `${hours.toString().padStart(2, '0')}:${minutes}:${seconds} ${ampm}`;
     }
 
     // Check if it's time for alarm
@@ -23,10 +26,17 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!alarmTime) return;
 
         const now = new Date();
-        const currentTime = now.getHours() * 100 + now.getMinutes();
-        const alarm = alarmTime.hours * 100 + alarmTime.minutes;
+        let hours = now.getHours();
+        let ampm = hours >= 12 ? 'PM' : 'AM';
+        hours = hours % 12;
+        hours = hours ? hours : 12;
+        const minutes = now.getMinutes();
 
-        if (currentTime === alarm) {
+        if (
+            hours === alarmTime.hours &&
+            minutes === alarmTime.minutes &&
+            ampm === alarmTime.ampm
+        ) {
             triggerAlarm();
         }
     }
@@ -54,9 +64,16 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
-        const [hours, minutes] = timeValue.split(':').map(Number);
-        alarmTime = { hours, minutes };
-        alarmStatus.textContent = `Alarm set for ${timeValue}`;
+        let [hours, minutes] = timeValue.split(':').map(Number);
+        let ampm = 'AM';
+        if (hours >= 12) {
+            ampm = 'PM';
+            if (hours > 12) hours -= 12;
+        } else if (hours === 0) {
+            hours = 12;
+        }
+        alarmTime = { hours, minutes, ampm };
+        alarmStatus.textContent = `Alarm set for ${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')} ${ampm}`;
         alarmTimeInput.value = '';
     });
 
