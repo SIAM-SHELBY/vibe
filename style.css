@@ -1,0 +1,109 @@
+body {
+    font-family: 'Times New Roman', serif;
+    background: linear-gradient(135deg, #2c1810 0%, #4a2c2a 50%, #1a1a1a 100%);
+    color: #FFD700;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    overflow: hidden;
+}
+
+.container {
+    text-align: center;
+    background: rgba(0, 0, 0, 0.7);
+    padding: 40px;
+    border-radius: 20px;
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
+    border: 2px solid #740001;
+}
+
+h1 {
+    font-size: 3em;
+    margin-bottom: 20px;
+    text-shadow: 2px 2px 4px #000;
+}
+
+.clock {
+    font-size: 4em;
+    font-weight: bold;
+    margin: 20px 0;
+    background: #740001;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5);
+}
+
+.alarm-section {
+    margin: 20px 0;
+}
+
+label {
+    display: block;
+    margin-bottom: 10px;
+    font-size: 1.2em;
+}
+
+input[type="time"] {
+    padding: 10px;
+    font-size: 1.2em;
+    border: 2px solid #FFD700;
+    border-radius: 5px;
+    background: #333;
+    color: #FFD700;
+}
+
+button {
+    padding: 10px 20px;
+    margin: 10px;
+    font-size: 1.1em;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+#set-alarm {
+    background: #740001;
+    color: #FFD700;
+}
+
+#set-alarm:hover {
+    background: #5a0000;
+}
+
+#clear-alarm {
+    background: #333;
+    color: #FFD700;
+}
+
+#clear-alarm:hover {
+    background: #555;
+}
+
+.alarm-status {
+    font-size: 1.5em;
+    margin: 20px 0;
+    color: #FFD700;
+}
+
+.quotes {
+    margin-top: 30px;
+    font-style: italic;
+    opacity: 0.8;
+}
+
+/* Add some magical sparkles */
+.container::before {
+    content: '';
+    position: absolute;
+    top: -10px;
+    left: -10px;
+    right: -10px;
+    bottom: -10px;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="1" fill="%23FFD700" opacity="0.5"/><circle cx="20" cy="30" r="0.5" fill="%23FFD700" opacity="0.7"/><circle cx="80" cy="70" r="0.5" fill="%23FFD700" opacity="0.6"/><circle cx="30" cy="80" r="0.5" fill="%23FFD700" opacity="0.8"/><circle cx="70" cy="20" r="0.5" fill="%23FFD700" opacity="0.5"/></svg>') repeat;
+    pointer-events: none;
+    z-index: -1;
+}

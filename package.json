@@ -1,0 +1,9 @@
+{
+  "name": "harrypotter-alarm",
+  "version": "1.0.0",
+  "description": "Cozy Harry Potter themed alarm clock",
+  "main": "index.html",
+  "scripts": {},
+  "author": "SIAM",
+  "license": "MIT"
+}
