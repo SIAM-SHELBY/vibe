@@ -34,7 +34,8 @@ QUIZ_QUESTIONS = [
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'hogwarts_secret_key'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///hogwarts_alarm.db'
+basedir = os.path.abspath(os.path.dirname(__file__))
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'hogwarts_alarm.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
