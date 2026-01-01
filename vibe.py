@@ -376,6 +376,12 @@ if __name__ == '__main__':
 			pass
 
 	# start background alarm checker
+# --- App Startup ---
+with app.app_context():
+	db.create_all()
+	init_houses()
+
+def start_alarm_checker():
 	import threading
 	import time as _time
 
@@ -392,10 +398,14 @@ if __name__ == '__main__':
 					db.session.commit()
 				except Exception as e:
 					print(f"Alarm checker error: {e}")
-			_time.sleep(10) # Check more frequently (every 10s) to not miss the minute
+			_time.sleep(10)
 
 	t = threading.Thread(target=alarm_checker, daemon=True)
 	t.start()
+
+start_alarm_checker()
+
+if __name__ == '__main__':
 	app.run(debug=True)
 
 

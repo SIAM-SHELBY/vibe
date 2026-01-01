@@ -23,14 +23,14 @@ const QUIZ_QUESTIONS = [
 ];
 
 // --- State Management ---
-// We store 'hp_users' as an array of objects: { name, house, points }
-// We store 'hp_current_user_name' as the key to the current active profile
 let state = {
     currentUser: null,
     allUsers: JSON.parse(localStorage.getItem('hp_users')) || [],
     alarmTime: localStorage.getItem('hp_alarm_time') || null,
     currentQuiz: null,
-    isAlarmActive: false
+    isAlarmActive: false,
+    lastTriggeredMinute: null,
+    tempName: ""
 };
 
 // --- DOM Elements ---
@@ -49,11 +49,12 @@ const audio = document.getElementById('alarm-audio');
 function init() {
     const savedName = localStorage.getItem('hp_current_user_name');
     if (savedName) {
-        state.currentUser = state.allUsers.find(u => u.name === savedName);
+        state.currentUser = state.allUsers.find(u => u.name.toLowerCase() === savedName.toLowerCase());
     }
 
     if (!state.currentUser) {
         showSection('name');
+        updateSortedList();
     } else {
         showSection('dashboard');
         updateDashboard();
@@ -69,13 +70,26 @@ function showSection(name) {
     if (sections[name]) sections[name].classList.remove('hidden');
 }
 
+function updateSortedList() {
+    const listCont = document.getElementById('sorted-students-list');
+    if (!listCont) return;
+
+    if (state.allUsers.length > 0) {
+        listCont.innerHTML = '<div style="font-size: 0.8rem; margin-top: 15px; border-top: 1px solid rgba(0,0,0,0.1); padding-top: 10px;">' +
+            '<strong>Magic Mirror (Local Profiles):</strong><br>' +
+            state.allUsers.map(u => `<span class="${u.house.toLowerCase()}">${u.name}</span>`).join(', ') +
+            '</div>';
+    } else {
+        listCont.innerHTML = '';
+    }
+}
+
 // --- Name Entry ---
 document.getElementById('name-form').addEventListener('submit', (e) => {
     e.preventDefault();
     const name = document.getElementById('user-name-input').value.trim();
     if (!name) return;
 
-    // Check if this student already exists in the book of names
     const existing = state.allUsers.find(u => u.name.toLowerCase() === name.toLowerCase());
     if (existing) {
         state.currentUser = existing;
@@ -83,7 +97,6 @@ document.getElementById('name-form').addEventListener('submit', (e) => {
         showSection('dashboard');
         updateDashboard();
     } else {
-        // New student - move to house sorting
         state.tempName = name;
         showSection('house');
     }
@@ -109,10 +122,11 @@ document.getElementById('house-form').addEventListener('submit', (e) => {
 // --- Dashboard ---
 function updateDashboard() {
     const user = state.currentUser;
+    if (!user) return;
+
     document.getElementById('user-info').textContent = `${user.name} of House ${user.house}`;
     document.getElementById('user-info').className = `cinzel ${user.house.toLowerCase()}`;
 
-    // Summary of house counts
     const summaryCont = document.getElementById('dashboard-members-summary');
     const counts = { Gryffindor: 0, Slytherin: 0, Ravenclaw: 0, Hufflepuff: 0 };
     state.allUsers.forEach(u => counts[u.house]++);
@@ -144,6 +158,7 @@ document.getElementById('logout-btn').addEventListener('click', () => {
     localStorage.removeItem('hp_current_user_name');
     state.currentUser = null;
     showSection('name');
+    updateSortedList();
 });
 
 // --- Alarm Logic ---
@@ -154,7 +169,8 @@ function startAlarmPoller() {
         const now = new Date();
         const currentTime = now.getHours().toString().padStart(2, '0') + ":" + now.getMinutes().toString().padStart(2, '0');
 
-        if (currentTime === state.alarmTime) {
+        if (currentTime === state.alarmTime && state.lastTriggeredMinute !== currentTime) {
+            state.lastTriggeredMinute = currentTime;
             triggerAlarm();
         }
     }, 5000);
@@ -177,9 +193,11 @@ function startQuiz(fromAlarm = false) {
 
     if (fromAlarm) {
         audio.play().catch(e => console.log("Audio needs interaction first"));
-        document.getElementById('alarm-indicator').style.display = 'block';
+        const indicator = document.getElementById('alarm-indicator');
+        if (indicator) indicator.style.display = 'block';
     } else {
-        document.getElementById('alarm-indicator').style.display = 'none';
+        const indicator = document.getElementById('alarm-indicator');
+        if (indicator) indicator.style.display = 'none';
     }
 
     showSection('quiz');
@@ -225,11 +243,9 @@ document.getElementById('quiz-form').addEventListener('submit', (e) => {
 function finishQuiz() {
     const score = state.currentQuiz.score;
 
-    // Update individual user points
     state.currentUser.points += score;
     localStorage.setItem('hp_users', JSON.stringify(state.allUsers));
 
-    // Stop alarm
     audio.pause();
     audio.currentTime = 0;
     state.isAlarmActive = false;
@@ -239,9 +255,8 @@ function finishQuiz() {
 
     showSection('results');
 
-    // Auto-redirect to dashboard after 5 seconds
     setTimeout(() => {
-        if (sections.results.classList.contains('hidden')) return; // already navigated away
+        if (sections.results.classList.contains('hidden')) return;
         showSection('dashboard');
         updateDashboard();
     }, 5000);
@@ -259,7 +274,6 @@ document.getElementById('view-leaderboard-btn').addEventListener('click', () => 
 
     const houses = ["Gryffindor", "Slytherin", "Ravenclaw", "Hufflepuff"];
 
-    // Calculate house totals
     const houseTotals = houses.map(h => {
         const members = state.allUsers.filter(u => u.house === h);
         const total = members.reduce((sum, u) => sum + u.points, 0);
@@ -296,5 +310,4 @@ document.getElementById('leaderboard-back-btn').addEventListener('click', () => 
     showSection('dashboard');
 });
 
-// Run Init
 init();
