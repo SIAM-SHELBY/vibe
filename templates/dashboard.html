@@ -16,6 +16,12 @@
   <input type="submit" value="Seal the Alarm">
 </form>
 
+<form method="post" action="/simulate_alarm" style="margin-top: 10px;">
+  <button type="submit"
+    style="background: var(--gryffindor); border-color: var(--gold); font-size: 0.8rem; padding: 8px;">Simulate Alarm
+    (Test Sound)</button>
+</form>
+
 {% if message %}
 <div class="message">
   {{ message }}
@@ -27,32 +33,60 @@
 <a href="/leaderboard">View Leaderboard</a>
 
 <script>
+  let serverAlarmTime = null;
+  let audioContextUnlocked = false;
+
+  // Function to 'wake up' the audio so it can ring later
+  function unlockAudio() {
+    if (audioContextUnlocked) return;
+    const silentAudio = new Audio('/static/alarm.mp3');
+    silentAudio.volume = 0;
+    silentAudio.play().then(() => {
+      silentAudio.pause();
+      audioContextUnlocked = true;
+      console.log("Hogwarts bells are now unlocked.");
+    }).catch(e => console.log("Audio unlock failed, will try on next click."));
+  }
+
   // Poll for alarm trigger every 2 seconds
   setInterval(function () {
+    // 1. Check Server Trigger
     fetch('/poll_alarm')
       .then(response => response.json())
       .then(data => {
         if (data.triggered) {
-          // Alarm has triggered! Redirect to quiz immediately
           window.location.href = '/quiz?alarm=true';
         }
       })
       .catch(err => console.log('Poll error:', err));
+
+    // 2. Client-Side Backup Trigger
+    if (serverAlarmTime) {
+      const now = new Date();
+      const currentLocalTime = now.getHours().toString().padStart(2, '0') + ":" + now.getMinutes().toString().padStart(2, '0');
+      if (currentLocalTime === serverAlarmTime) {
+        fetch('/simulate_alarm', { method: 'POST' })
+          .then(() => window.location.href = '/quiz?alarm=true');
+      }
+    }
   }, 2000);
+
+  // Unmute audio when user interacts with the form
+  document.querySelector('form[action="/set_alarm"]').addEventListener('submit', unlockAudio);
+  document.body.addEventListener('click', unlockAudio, { once: true });
 
   // Fetch and display current alarm status
   fetch('/alarms')
     .then(response => response.json())
     .then(data => {
       if (data.alarm && data.alarm.active) {
-        // Convert 24h to 12h for the UI display
+        serverAlarmTime = data.alarm.time;
         const [h, m] = data.alarm.time.split(':');
         const hour = parseInt(h);
         const ampm = hour >= 12 ? 'PM' : 'AM';
         const displayHour = hour % 12 || 12;
         const statusText = `⏰ Alarm set for ${displayHour}:${m} ${ampm}`;
 
-        // Only show if the server message isn't already there to avoid double display
         if (!document.querySelector('.message')) {
           document.getElementById('alarm-status').textContent = statusText;
         }

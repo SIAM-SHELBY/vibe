@@ -198,14 +198,20 @@ def simulate_alarm():
 	user_id = session.get('user_id')
 	if not user_id:
 		return redirect(url_for('login_page'))
-	# Mark alarm as triggered (deactivate)
+	# Mark alarm as triggered
 	alarm = Alarm.query.filter_by(user_id=user_id).first()
 	if alarm:
+		# Deactivate and trigger
 		alarm.active = False
 		alarm.triggered = True
 		db.session.commit()
-	# Redirect to quiz which will start a quiz session
-	return redirect(url_for('quiz_page'))
+	
+	# If this was a fetch call (client trigger), return JSON
+	if request.headers.get('Accept') == 'application/json' or request.is_json:
+		return jsonify({'message': 'Alarm simulated'})
+		
+	# Redirect to quiz for normal form submissions
+	return redirect(url_for('quiz_page', alarm='true'))
 
 
 @app.route('/alarms', methods=['GET'])

@@ -6,6 +6,9 @@
     <div id="alarm-indicator"
         style="display:none; background:#8b0000; color:#fff; padding:12px; text-align:center; margin-bottom:20px; font-weight:bold; font-family: 'Cinzel', serif; box-shadow: 0 0 15px rgba(139, 0, 0, 0.4);">
         🔔 THE ALARM IS RINGING!
+        <button id="unmute-btn"
+            style="display:none; margin-top:10px; background:white; color:#8b0000; padding:5px 10px; border:none; cursor:pointer; font-family:'Cinzel';">Tap
+            to Start Sound 🔊</button>
     </div>
 
     {% if question %}
@@ -69,7 +72,17 @@
         }
 
         // Start playing
-        alarmAudio.play().catch(err => console.log('Audio pending user interaction...'));
+        alarmAudio.play().catch(err => {
+            console.log('Audio pending user interaction...');
+            document.getElementById('unmute-btn').style.display = 'inline-block';
+        });
+
+        document.getElementById('unmute-btn').addEventListener('click', () => {
+            if (alarmAudio) {
+                alarmAudio.play();
+                document.getElementById('unmute-btn').style.display = 'none';
+            }
+        });
 
         // Save position every 100ms
         setInterval(() => {
