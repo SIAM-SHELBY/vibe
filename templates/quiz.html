@@ -1,0 +1,112 @@
+{% extends "layout.html" %}
+{% block content %}
+<div id="quiz-box">
+    <h1>Morning Trials</h1>
+    <h2>Question {{ index+1 }} of 5</h2>
+
+    <!-- Alarm indicator -->
+    <div id="alarm-indicator"
+        style="display:none; background:#8b0000; color:#fff; padding:12px; text-align:center; margin-bottom:20px; font-weight:bold; font-family: 'Cinzel', serif; box-shadow: 0 0 15px rgba(139, 0, 0, 0.4);">
+        🔔 THE ALARM IS RINGING!
+    </div>
+
+    {% if question %}
+    <form method="post" id="quiz-form">
+        <div style="font-size: 1.25rem; margin-bottom: 20px; font-weight: 600;">{{ question['question'] }}</div>
+
+        <div style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 25px;">
+            {% for opt in question['options'] %}
+            <label
+                style="display: flex; align-items: center; cursor: pointer; padding: 10px; background: rgba(0,0,0,0.03); border: 1px solid rgba(0,0,0,0.1); transition: 0.2s;">
+                <input type="radio" name="answer" value="{{ opt }}" required style="width: auto; margin: 0 15px 0 0;">
+                <span style="font-size: 1.1rem;">{{ opt }}</span>
+            </label>
+            {% endfor %}
+        </div>
+
+        <input type="submit" value="Cast Spell (Submit)">
+    </form>
+
+    <div
+        style="margin-top: 20px; display: flex; justify-content: space-between; font-family: 'Cinzel', serif; font-size: 0.9rem; color: #555;">
+        <span>Current Score: {{ score }}</span>
+        <span>House: {{ session.get('house', 'Hogwarts') }}</span>
+    </div>
+
+    {% if message %}<div class="message">{{ message }}</div>{% endif %}
+
+    {% elif announcement %}
+    <div class="message" style="font-size: 1.2rem; border-color: var(--gold);">
+        {{ announcement }}
+    </div>
+    <div style="text-align: center; margin: 30px 0;">
+        <div style="font-family: 'Cinzel', serif; font-size: 0.8rem; text-transform: uppercase; color: #777;">Final
+            Performance</div>
+        <div style="font-size: 3rem; font-weight: 700; color: #3d2b1f;">{{ score }}</div>
+    </div>
+    <a href="/dashboard" class="btn">Return to Common Room</a>
+    {% else %}
+    <div class="message">The trials have not yet begun.</div>
+    <a href="/dashboard" class="btn">Return to Dashboard</a>
+    {% endif %}
+</div>
+
+<script>
+    // Audio persistence logic
+    const urlParams = new URLSearchParams(window.location.search);
+    const isAlarm = urlParams.get('alarm') === 'true';
+    let alarmAudio = null;
+
+    if (isAlarm) {
+        document.getElementById('alarm-indicator').style.display = 'block';
+
+        alarmAudio = new Audio('/static/alarm.mp3');
+        alarmAudio.loop = true;
+
+        // Restore position from storage
+        const savedTime = localStorage.getItem('alarmAudioTime');
+        if (savedTime) {
+            alarmAudio.currentTime = parseFloat(savedTime);
+        }
+
+        // Start playing
+        alarmAudio.play().catch(err => console.log('Audio pending user interaction...'));
+
+        // Save position every 100ms
+        setInterval(() => {
+            if (alarmAudio && !alarmAudio.paused) {
+                localStorage.setItem('alarmAudioTime', alarmAudio.currentTime);
+            }
+        }, 100);
+    }
+
+    function isQuizComplete() {
+        return document.querySelector('.message') &&
+            (document.querySelector('.message').textContent.includes('points to') ||
+                document.querySelector('.btn')?.textContent.includes('Return'));
+    }
+
+    // Stop audio on completion
+    if (isQuizComplete()) {
+        localStorage.removeItem('alarmAudioTime');
+
+        // Auto-redirect to dashboard after 5 seconds
+        if (document.querySelector('.message').textContent.includes('points to')) {
+            setTimeout(() => {
+                window.location.href = '/dashboard';
+            }, 5000);
+        }
+    }
+</script>
+
+<style>
+    label:hover {
+        background: rgba(0, 0, 0, 0.08) !important;
+        border-color: var(--gold) !important;
+    }
+
+    input[type="radio"]:checked+span {
+        font-weight: bold;
+    }
+</style>
+{% endblock %}

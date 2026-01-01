@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hogwarts | Morning Trials</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Cinzel:wght@400;700&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --parchment: #f4e4bc;
+            --ink: #2c1e14;
+            --gold: #d4af37;
+            --gryffindor: #740001;
+            --slytherin: #1a472a;
+            --ravenclaw: #0e1a40;
+            --hufflepuff: #ecb939;
+        }
+
+        body {
+            background: #121212;
+            background-image:
+                radial-gradient(circle at 50% 50%, rgba(44, 30, 20, 0.4) 0%, rgba(0, 0, 0, 0.9) 100%),
+                url('https://www.transparenttextures.com/patterns/dark-matter.png');
+            color: var(-- parched);
+            font-family: 'Cormorant Garamond', serif;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .parchment-container {
+            position: relative;
+            max-width: 500px;
+            width: 90%;
+            margin: 20px;
+            background: var(--parchment);
+            background-image: url('https://www.transparenttextures.com/patterns/papyrus.png');
+            padding: 40px;
+            border-radius: 4px;
+            box-shadow:
+                0 10px 30px rgba(0, 0, 0, 0.8),
+                inset 0 0 100px rgba(139, 69, 19, 0.2);
+            color: var(--ink);
+            border: 1px solid #d2b48c;
+        }
+
+        .parchment-container::before {
+            content: '';
+            position: absolute;
+            top: 5px;
+            left: 5px;
+            right: 5px;
+            bottom: 5px;
+            border: 2px solid #3d2b1f;
+            pointer-events: none;
+            opacity: 0.3;
+        }
+
+        h1,
+        h2 {
+            font-family: 'Cinzel', serif;
+            text-align: center;
+            margin-top: 0;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: #3d2b1f;
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            border-bottom: 2px solid var(--gold);
+            padding-bottom: 10px;
+        }
+
+        h2 {
+            font-size: 1.2rem;
+            margin-top: 20px;
+        }
+
+        .gryffindor {
+            color: var(--gryffindor);
+            font-weight: bold;
+        }
+
+        .slytherin {
+            color: var(--slytherin);
+            font-weight: bold;
+        }
+
+        .ravenclaw {
+            color: var(--ravenclaw);
+            font-weight: bold;
+        }
+
+        .hufflepuff {
+            color: #856404;
+            font-weight: bold;
+        }
+
+        button,
+        input[type="submit"],
+        .btn {
+            display: inline-block;
+            width: 100%;
+            background: #3d2b1f;
+            color: var(--parchment);
+            border: 1px solid var(--gold);
+            padding: 12px;
+            font-family: 'Cinzel', serif;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 15px;
+            text-decoration: none;
+            text-align: center;
+            box-sizing: border-box;
+        }
+
+        button:hover,
+        input[type="submit"]:hover,
+        .btn:hover {
+            background: #4e3828;
+            box-shadow: 0 0 15px rgba(212, 175, 55, 0.4);
+            transform: translateY(-2px);
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="password"],
+        input[type="time"],
+        select {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            background: rgba(0, 0, 0, 0.05);
+            border: 1px solid #3d2b1f;
+            border-radius: 0;
+            font-family: inherit;
+            font-size: 1.1rem;
+            box-sizing: border-box;
+        }
+
+        .message {
+            background: rgba(139, 69, 19, 0.1);
+            border-left: 4px solid #3d2b1f;
+            padding: 15px;
+            margin: 20px 0;
+            font-style: italic;
+            text-align: center;
+        }
+
+        hr {
+            border: 0;
+            height: 1px;
+            background-image: linear-gradient(to right, rgba(0, 0, 0, 0), rgba(61, 43, 31, 0.75), rgba(0, 0, 0, 0));
+            margin: 25px 0;
+        }
+
+        a {
+            color: #3d2b1f;
+            text-decoration: none;
+            border-bottom: 1px dashed #3d2b1f;
+            transition: all 0.2s;
+        }
+
+        a:hover {
+            color: var(--gold);
+            border-bottom-color: var(--gold);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="parchment-container">
+        {% block content %}{% endblock %}
+    </div>
+</body>
+
+</html>

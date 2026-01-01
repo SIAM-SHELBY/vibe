@@ -1,0 +1,16 @@
+{% extends "layout.html" %}
+{% block content %}
+<h1>Welcome, {{ username }}!</h1>
+<h2>Select Your Hogwarts House</h2>
+<form method="post">
+    <select name="house" required>
+        <option value="">Choose your house</option>
+        <option value="Gryffindor" class="gryffindor">Gryffindor</option>
+        <option value="Slytherin" class="slytherin">Slytherin</option>
+        <option value="Ravenclaw" class="ravenclaw">Ravenclaw</option>
+        <option value="Hufflepuff" class="hufflepuff">Hufflepuff</option>
+    </select>
+    <input type="submit" value="Join House">
+</form>
+{% if message %}<div class="message">{{ message }}</div>{% endif %}
+{% endblock %}

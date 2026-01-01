@@ -1,0 +1,50 @@
+{% extends "layout.html" %}
+{% block content %}
+<h1>Hogwarts Dashboard</h1>
+<h2>Houses</h2>
+{% for house, list in members.items() %}
+<div style="margin-bottom:12px;">
+  <strong class="{{ house|lower }}">{{ house }}</strong> — Members: {{ list|length }}
+  <div style="font-size:0.9em; margin-left:8px;">{{ list|join(', ') if list else 'No members yet' }}</div>
+</div>
+{% endfor %}
+<hr>
+<h2>Alarm</h2>
+<form method="post" action="/set_alarm">
+  <label>Set alarm time (HH:MM, 24h)</label>
+  <input type="time" name="alarm_time" required>
+  <input type="submit" value="Set Alarm">
+</form>
+<form method="post" action="/simulate_alarm" style="margin-top:10px;">
+  <input type="submit" value="Simulate Alarm Now">
+</form>
+{% if message %}<div class="message">{{ message }}</div>{% endif %}
+<div id="alarm-status" style="margin-top:10px; font-style:italic; color:#888;"></div>
+<hr>
+<a href="/leaderboard">View Leaderboard</a>
+
+<script>
+  // Poll for alarm trigger every 2 seconds
+  setInterval(function () {
+    fetch('/poll_alarm')
+      .then(response => response.json())
+      .then(data => {
+        if (data.triggered) {
+          // Alarm has triggered! Redirect to quiz immediately
+          window.location.href = '/quiz?alarm=true';
+        }
+      })
+      .catch(err => console.log('Poll error:', err));
+  }, 2000);
+
+  // Fetch and display current alarm status
+  fetch('/alarms')
+    .then(response => response.json())
+    .then(data => {
+      if (data.alarm && data.alarm.active) {
+        document.getElementById('alarm-status').textContent =
+          '⏰ Alarm set for ' + data.alarm.time;
+      }
+    });
+</script>
+{% endblock %}

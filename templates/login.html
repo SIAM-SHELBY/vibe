@@ -1,0 +1,12 @@
+{% extends "layout.html" %}
+{% block content %}
+<h1>Hogwarts Morning Trials</h1>
+<h2>Login</h2>
+<form method="post">
+    <input type="text" name="username" placeholder="Username" required>
+    <input type="password" name="password" placeholder="Password" required>
+    <input type="submit" value="Login">
+</form>
+<p>Don't have an account? <a href="/register">Register here</a></p>
+{% if message %}<div class="message">{{ message }}</div>{% endif %}
+{% endblock %}

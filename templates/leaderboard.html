@@ -1,0 +1,17 @@
+{% extends "layout.html" %}
+{% block content %}
+<h1>House Leaderboard</h1>
+<table style="width:100%;margin-bottom:20px;">
+    <tr><th>House</th><th>Points</th></tr>
+    {% for entry in leaderboard %}
+    <tr>
+        <td class="{{ entry.house|lower }}">{{ entry.house }}</td>
+        <td>{{ entry.total_points }}</td>
+    </tr>
+    {% endfor %}
+</table>
+{% if user_streak is not none %}
+<div class="message">Your current streak: {{ user_streak }}</div>
+{% endif %}
+<a href="/quiz">Back to Quiz</a>
+{% endblock %}
