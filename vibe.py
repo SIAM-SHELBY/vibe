@@ -266,8 +266,11 @@ def quiz_page():
 			alarm.triggered = False
 			db.session.commit()
 
-		sampled = random.sample(QUIZ_QUESTIONS, 5)  # Use 5 questions as requested
 		# Build public questions list and answers list separately to avoid mutating globals
+		sampled = random.sample(QUIZ_QUESTIONS, 5)
+		# Ensure we don't get the exact same questions twice in a row if possible (shuffling current pool)
+		random.shuffle(sampled)
+		
 		public_questions = []
 		answers = []
 		for q in sampled:
@@ -305,13 +308,49 @@ def quiz_page():
 		
 		# If quiz is complete after this answer
 		if index == len(questions):
+			if score < 30:
+				# Restart logic: User didn't get 30 points, alarm keeps ringing
+				# Re-initialize questions for a new round
+				sampled = random.sample(QUIZ_QUESTIONS, 5)
+				random.shuffle(sampled)
+				public_questions = []
+				answers = []
+				for q in sampled:
+					opts = list(q['options'])
+					random.shuffle(opts)
+					public_questions.append({'question': q['question'], 'options': opts})
+					answers.append(q['answer'])
+				
+				session['quiz_questions'] = public_questions
+				session['quiz_answers'] = answers
+				session['quiz_score'] = 0
+				session['quiz_index'] = 0
+				
+				if request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.is_json:
+					return jsonify({
+						'complete': False,
+						'restart': True,
+						'message': "Score too low! The trials continue! (Need at least 30)",
+						'question': public_questions[0],
+						'index': 0,
+						'score': 0
+					})
+				return render_template('quiz.html', question=public_questions[0], index=0, score=0, message="Score too low! Try again!")
+
+			# If score >= 30, proceed with completion
 			user = User.query.get(user_id)
-			user.daily_score = score
+			user.daily_score += score # Fixed: Use += instead of =
 			user.streak += 1
 			user.last_alarm_date = datetime.datetime.now().strftime('%Y-%m-%d')
 			house = db.session.get(House, user.house)
 			if house:
 				house.total_points += score
+			
+			# Reset alarm trigger in DB only when successfully completed
+			alarm = Alarm.query.filter_by(user_id=user_id).first()
+			if alarm:
+				alarm.triggered = False
+			
 			db.session.commit()
 			announcement = f"{score} points to {user.house}! — awarded by Professor Dumbledore to {user.username}"
 			

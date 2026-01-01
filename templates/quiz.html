@@ -31,7 +31,7 @@
 
     <div
         style="margin-top: 20px; display: flex; justify-content: space-between; font-family: 'Cinzel', serif; font-size: 0.9rem; color: #555;">
-        <span>Current Score: {{ score }}</span>
+        <span id="current-score-display">Current Score: {{ score }}</span>
         <span>House: {{ session.get('house', 'Hogwarts') }}</span>
     </div>
 
@@ -140,11 +140,16 @@
                     `;
                         setTimeout(() => { window.location.href = '/dashboard'; }, 5000);
                     } else {
+                        // Handle restart or next question
+                        if (data.restart) {
+                            alert(data.message || "Score too low! Try again!");
+                        }
+
                         // Update to next question
                         const qIndex = data.index + 1;
                         document.getElementById('quiz-box').querySelector('h2').textContent = `Question ${qIndex} of 5`;
                         const formContent = document.getElementById('quiz-form');
-                        formContent.querySelector('div').textContent = data.question.question;
+                        formContent.querySelector('div:first-of-type').textContent = data.question.question;
 
                         let optionsHtml = '';
                         data.question.options.forEach(opt => {
@@ -159,8 +164,11 @@
                         submitBtn.disabled = false;
                         submitBtn.value = "Cast Spell (Submit)";
 
-                        // Update score display
-                        document.getElementById('quiz-box').querySelector('span').textContent = `Current Score: ${data.score}`;
+                        // Update score display at the bottom (target the first span correctly)
+                        const scoreSpan = document.getElementById('current-score-display');
+                        if (scoreSpan) {
+                            scoreSpan.textContent = `Current Score: ${data.score}`;
+                        }
                     }
                 })
                 .catch(err => {
