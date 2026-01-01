@@ -143,7 +143,7 @@ document.getElementById('alarm-form').addEventListener('submit', (e) => {
 document.getElementById('logout-btn').addEventListener('click', () => {
     localStorage.removeItem('hp_current_user_name');
     state.currentUser = null;
-    showSection('house');
+    showSection('name');
 });
 
 // --- Alarm Logic ---
