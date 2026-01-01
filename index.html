@@ -13,12 +13,21 @@
 
 <body>
     <div class="parchment-container">
+        <!-- Section: Name Entry -->
+        <div id="section-name" class="hidden">
+            <h1>Welcome to Hogwarts</h1>
+            <p class="message">"Step forward and state your name, young traveler..."</p>
+            <form id="name-form">
+                <input type="text" id="user-name-input" placeholder="Your Name (e.g. Harry Potter)" required>
+                <button type="submit">Continue</button>
+            </form>
+        </div>
+
         <!-- Section: House Selection -->
         <div id="section-house" class="hidden">
-            <h1>Welcome to Hogwarts</h1>
-            <p class="message">"State your name and the Sorting Hat will decide your fate..."</p>
+            <h1>Sorting Ceremony</h1>
+            <p class="message" id="sorting-hat-quote">"The Sorting Hat will now decide your fate..."</p>
             <form id="house-form">
-                <input type="text" id="user-name-input" placeholder="Your Name (e.g. Harry Potter)" required>
                 <select id="house-select" required>
                     <option value="" disabled selected>Select Your House</option>
                     <option value="Gryffindor">Gryffindor</option>
@@ -26,7 +35,7 @@
                     <option value="Ravenclaw">Ravenclaw</option>
                     <option value="Hufflepuff">Hufflepuff</option>
                 </select>
-                <button type="submit">Step into the Great Hall</button>
+                <button type="submit">Sort Me!</button>
             </form>
         </div>
 

@@ -35,6 +35,7 @@ let state = {
 
 // --- DOM Elements ---
 const sections = {
+    name: document.getElementById('section-name'),
     house: document.getElementById('section-house'),
     dashboard: document.getElementById('section-dashboard'),
     quiz: document.getElementById('section-quiz'),
@@ -52,7 +53,7 @@ function init() {
     }
 
     if (!state.currentUser) {
-        showSection('house');
+        showSection('name');
     } else {
         showSection('dashboard');
         updateDashboard();
@@ -62,31 +63,42 @@ function init() {
 }
 
 function showSection(name) {
-    Object.values(sections).forEach(s => s.classList.add('hidden'));
-    sections[name].classList.remove('hidden');
+    Object.values(sections).forEach(s => {
+        if (s) s.classList.add('hidden');
+    });
+    if (sections[name]) sections[name].classList.remove('hidden');
 }
 
-// --- House Selection / "Login" ---
-document.getElementById('house-form').addEventListener('submit', (e) => {
+// --- Name Entry ---
+document.getElementById('name-form').addEventListener('submit', (e) => {
     e.preventDefault();
     const name = document.getElementById('user-name-input').value.trim();
-    const house = document.getElementById('house-select').value;
-
     if (!name) return;
 
-    // Check if user already exists
-    let user = state.allUsers.find(u => u.name.toLowerCase() === name.toLowerCase());
-
-    if (user) {
-        // Just update house if they picked a different one (sorting hat is flexible)
-        user.house = house;
+    // Check if this student already exists in the book of names
+    const existing = state.allUsers.find(u => u.name.toLowerCase() === name.toLowerCase());
+    if (existing) {
+        state.currentUser = existing;
+        localStorage.setItem('hp_current_user_name', existing.name);
+        showSection('dashboard');
+        updateDashboard();
     } else {
-        // Create new student
-        user = { name: name, house: house, points: 0 };
-        state.allUsers.push(user);
+        // New student - move to house sorting
+        state.tempName = name;
+        showSection('house');
     }
+});
 
+// --- House Selection / Sorting ---
+document.getElementById('house-form').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const house = document.getElementById('house-select').value;
+    const name = state.tempName;
+
+    const user = { name: name, house: house, points: 0 };
+    state.allUsers.push(user);
     state.currentUser = user;
+
     localStorage.setItem('hp_current_user_name', user.name);
     localStorage.setItem('hp_users', JSON.stringify(state.allUsers));
 
