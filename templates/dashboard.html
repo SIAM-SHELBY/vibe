@@ -11,12 +11,18 @@
 <hr>
 <h2>Alarm</h2>
 <form method="post" action="/set_alarm">
-  <label>Set alarm time (HH:MM, 24h)</label>
+  <label>Set your awakening (AM/PM)</label>
   <input type="time" name="alarm_time" required>
-  <input type="submit" value="Set Alarm">
+  <input type="submit" value="Seal the Alarm">
 </form>
-{% if message %}<div class="message">{{ message }}</div>{% endif %}
-<div id="alarm-status" style="margin-top:10px; font-style:italic; color:#888;"></div>
+
+{% if message %}
+<div class="message">
+  {{ message }}
+</div>
+{% endif %}
+
+<div id="alarm-status" style="margin-top:10px; font-style:italic; color:#3d2b1f; font-family: 'Cinzel', serif;"></div>
 <hr>
 <a href="/leaderboard">View Leaderboard</a>
 
@@ -39,8 +45,17 @@
     .then(response => response.json())
     .then(data => {
       if (data.alarm && data.alarm.active) {
-        document.getElementById('alarm-status').textContent =
-          '⏰ Alarm set for ' + data.alarm.time;
+        // Convert 24h to 12h for the UI display
+        const [h, m] = data.alarm.time.split(':');
+        const hour = parseInt(h);
+        const ampm = hour >= 12 ? 'PM' : 'AM';
+        const displayHour = hour % 12 || 12;
+        const statusText = `⏰ Alarm set for ${displayHour}:${m} ${ampm}`;
+
+        // Only show if the server message isn't already there to avoid double display
+        if (!document.querySelector('.message')) {
+          document.getElementById('alarm-status').textContent = statusText;
+        }
       }
     });
 </script>

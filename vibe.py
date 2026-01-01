@@ -177,8 +177,19 @@ def set_alarm():
 		alarm.time = alarm_time
 		alarm.active = True
 	db.session.commit()
+	
+	# Convert 24h to 12h for the confirmation message
+	try:
+		h, m = alarm_time.split(':')
+		h_int = int(h)
+		ampm = 'PM' if h_int >= 12 else 'AM'
+		display_h = h_int % 12 or 12
+		display_time = f"{display_h}:{m} {ampm}"
+	except:
+		display_time = alarm_time
+		
 	members = get_house_members()
-	return render_template('dashboard.html', members=members, message=f'Alarm set for {alarm_time}')
+	return render_template('dashboard.html', members=members, message=f'✨ Alarm sealed for {display_time}')
 
 
 @app.route('/simulate_alarm', methods=['POST'])

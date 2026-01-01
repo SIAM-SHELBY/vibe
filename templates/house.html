@@ -1,6 +1,9 @@
 {% extends "layout.html" %}
 {% block content %}
 <h1>Welcome, {{ username }}!</h1>
+<div class="message" style="border-color: var(--gold); background: rgba(212, 175, 55, 0.05);">
+    "The Sorting Hat will now decide your fate..."
+</div>
 <h2>Select Your Hogwarts House</h2>
 <form method="post">
     <select name="house" required>
