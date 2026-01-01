@@ -1,17 +1,35 @@
 {% extends "layout.html" %}
 {% block content %}
 <h1>House Leaderboard</h1>
-<table style="width:100%;margin-bottom:20px;">
-    <tr><th>House</th><th>Points</th></tr>
+<div style="margin-bottom: 30px;">
     {% for entry in leaderboard %}
-    <tr>
-        <td class="{{ entry.house|lower }}">{{ entry.house }}</td>
-        <td>{{ entry.total_points }}</td>
-    </tr>
+    <div style="margin-bottom: 25px; border-bottom: 1px solid rgba(0,0,0,0.1); padding-bottom: 15px;">
+        <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 10px;">
+            <h3 class="{{ entry.house|lower }}" style="margin: 0; font-family: 'Cinzel', serif;">{{ entry.house }}</h3>
+            <span style="font-weight: bold; color: #3d2b1f;">{{ entry.total_points }} pts</span>
+        </div>
+        <div style="padding-left: 15px;">
+            {% if entry.users %}
+            <table style="width: 100%; font-size: 0.95rem;">
+                {% for u in entry.users %}
+                <tr>
+                    <td style="padding: 3px 0;">{{ u.username }}</td>
+                    <td style="text-align: right; color: #777;">{{ u.daily_score }} pts</td>
+                </tr>
+                {% endfor %}
+            </table>
+            {% else %}
+            <div style="font-size: 0.9rem; font-style: italic; color: #888;">No members yet</div>
+            {% endif %}
+        </div>
+    </div>
     {% endfor %}
-</table>
+</div>
+
 {% if user_streak is not none %}
-<div class="message">Your current streak: {{ user_streak }}</div>
+<div class="message">Your current streak: {{ user_streak }} days</div>
 {% endif %}
-<a href="/quiz">Back to Quiz</a>
+
+<hr>
+<a href="/dashboard" class="btn">Back to Dashboard</a>
 {% endblock %}

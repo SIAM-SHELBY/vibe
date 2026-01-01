@@ -1,19 +1,28 @@
-# GitHub Pages Deployment
+# Hogwarts | Morning Trials Deployment
 
-To deploy this Harry Potter themed alarm clock to GitHub Pages:
+This version is optimized for **GitHub Pages**. All magic (logic) runs in the browser, so no Python/Flask server is required.
 
-1. Make sure your main files (`index.html`, `style.css`, `script.js`) are in the root directory.
-2. Commit all changes:
-   ```
+## 🚀 How to Live Link
+
+1. **Commit and Push** your changes to GitHub:
+   ```bash
    git add .
-   git commit -m "Prepare for GitHub Pages"
-   ```
-3. Push to GitHub:
-   ```
+   git commit -m "Update to Hogwarts static parchment theme"
    git push origin main
    ```
-4. On GitHub, go to your repository settings > Pages.
-5. Under "Source", select the `main` branch and `/ (root)` folder.
-6. Save. Your site will be published at `https://SIAM-SHELBY.github.io/vibe/`.
 
-No build step is needed for this static site.
+2. **Enable GitHub Pages**:
+   - Go to your repository on GitHub.
+   - Click **Settings** ⚙️.
+   - Click **Pages** in the left sidebar.
+   - Under **Build and deployment**, set the source to `Deploy from a branch`.
+   - Select **Branch**: `main` and **Folder**: `/ (root)`.
+   - Click **Save**.
+
+3. **Enjoy!**
+   - Your link will be: `https://siam-shelby.github.io/vibe/`
+   - *Note: It may take 1-2 minutes for the site to appear.*
+
+## 🪄 Wizarding Notes
+- **Persistent Progress**: Your house and scores are saved in your browser's "Local Storage". 
+- **Sound**: Ensure the `static/alarm.mp3` file is uploaded for the alarm to work!

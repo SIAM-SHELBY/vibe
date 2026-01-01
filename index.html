@@ -1,27 +1,102 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cozy Harry Potter Alarm Clock</title>
+    <title>Hogwarts | Morning Trials</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Cinzel:wght@400;700&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
-    <div class="container">
-        <h1>Hogwarts Alarm Clock</h1>
-        <div class="clock" id="clock">00:00:00</div>
-        <div class="alarm-section">
-            <label for="alarm-time">Set Alarm Time:</label>
-            <input type="time" id="alarm-time">
-            <button id="set-alarm">Set Alarm</button>
-            <button id="clear-alarm">Clear Alarm</button>
+    <div class="parchment-container">
+        <!-- Section: House Selection -->
+        <div id="section-house" class="hidden">
+            <h1>Welcome to Hogwarts</h1>
+            <p class="message">"The Sorting Hat will now decide your fate..."</p>
+            <form id="house-form">
+                <select id="house-select" required>
+                    <option value="" disabled selected>Select Your House</option>
+                    <option value="Gryffindor">Gryffindor</option>
+                    <option value="Slytherin">Slytherin</option>
+                    <option value="Ravenclaw">Ravenclaw</option>
+                    <option value="Hufflepuff">Hufflepuff</option>
+                </select>
+                <button type="submit">Step into the Great Hall</button>
+            </form>
         </div>
-        <div class="alarm-status" id="alarm-status">No alarm set</div>
-        <div class="quotes">
-            <p>"It does not do to dwell on dreams and forget to live." - Albus Dumbledore</p>
+
+        <!-- Section: Dashboard -->
+        <div id="section-dashboard" class="hidden">
+            <h1>Hogwarts Dashboard</h1>
+            <div style="text-align: center; margin-bottom: 20px;">
+                <span id="user-info" class="cinzel" style="font-weight: bold;"></span>
+            </div>
+
+            <hr>
+            <h2>Set Your Awakening</h2>
+            <form id="alarm-form">
+                <label>Alarm Time (24h)</label>
+                <input type="time" id="alarm-time-input" required>
+                <button type="submit">Seal the Alarm</button>
+            </form>
+            <div id="alarm-status" class="message">No alarm set</div>
+
+            <hr>
+            <button id="view-leaderboard-btn" class="btn">View House Standings</button>
+            <button id="logout-btn"
+                style="background: transparent; color: #3d2b1f; border-color: #3d2b1f; margin-top: 20px; font-size: 0.7rem;">Change
+                House</button>
+        </div>
+
+        <!-- Section: Quiz -->
+        <div id="section-quiz" class="hidden">
+            <div id="alarm-indicator">
+                🔔 THE ALARM IS RINGING!
+            </div>
+            <h1>Morning Trials</h1>
+            <h2 id="quiz-question-number">Question 1 of 5</h2>
+
+            <form id="quiz-form">
+                <div id="quiz-question-text" style="font-size: 1.25rem; margin-bottom: 20px; font-weight: 600;"></div>
+                <div id="quiz-options" style="display: flex; flex-direction: column;"></div>
+                <button type="submit">Cast Spell (Submit)</button>
+            </form>
+
+            <div
+                style="margin-top: 20px; display: flex; justify-content: space-between; font-family: 'Cinzel', serif; font-size: 0.9rem; color: #555;">
+                <span id="quiz-current-score">Score: 0</span>
+                <span id="quiz-house-name">House: </span>
+            </div>
+        </div>
+
+        <!-- Section: Results -->
+        <div id="section-results" class="hidden">
+            <h1>Trial Complete</h1>
+            <div id="result-message" class="message"></div>
+            <div style="text-align: center; margin: 30px 0;">
+                <div style="font-family: 'Cinzel', serif; font-size: 0.8rem; text-transform: uppercase; color: #777;">
+                    Final Performance</div>
+                <div id="result-score" style="font-size: 3rem; font-weight: 700; color: #3d2b1f;">0</div>
+            </div>
+            <button id="result-back-btn" class="btn">Return to Common Room</button>
+        </div>
+
+        <!-- Section: Leaderboard -->
+        <div id="section-leaderboard" class="hidden">
+            <h1>House Leaderboard</h1>
+            <div id="leaderboard-content" style="margin-bottom: 30px;"></div>
+            <button id="leaderboard-back-btn" class="btn">Back to Dashboard</button>
         </div>
     </div>
-    <audio id="alarm-sound" src="https://www.soundjay.com/misc/sounds/bell-ringing-05.wav" preload="auto"></audio>
+
+    <!-- Hidden audio element -->
+    <audio id="alarm-audio" src="static/alarm.mp3" loop></audio>
+
     <script src="script.js"></script>
 </body>
+
 </html>

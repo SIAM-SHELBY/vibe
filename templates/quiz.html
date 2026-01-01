@@ -2,8 +2,6 @@
 {% block content %}
 <div id="quiz-box">
     <h1>Morning Trials</h1>
-    <h2>Question {{ index+1 }} of 5</h2>
-
     <!-- Alarm indicator -->
     <div id="alarm-indicator"
         style="display:none; background:#8b0000; color:#fff; padding:12px; text-align:center; margin-bottom:20px; font-weight:bold; font-family: 'Cinzel', serif; box-shadow: 0 0 15px rgba(139, 0, 0, 0.4);">
@@ -11,6 +9,7 @@
     </div>
 
     {% if question %}
+    <h2>Question {{ index+1 }} of 5</h2>
     <form method="post" id="quiz-form">
         <div style="font-size: 1.25rem; margin-bottom: 20px; font-weight: 600;">{{ question['question'] }}</div>
 

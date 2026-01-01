@@ -308,10 +308,14 @@ def quiz_page():
 @app.route('/leaderboard', methods=['GET'])
 def leaderboard_page():
 	houses = House.query.order_by(House.total_points.desc()).all()
-	leaderboard = [{
-		'house': h.name,
-		'total_points': h.total_points
-	} for h in houses]
+	leaderboard = []
+	for h in houses:
+		users = User.query.filter_by(house=h.name).order_by(User.daily_score.desc()).all()
+		leaderboard.append({
+			'house': h.name,
+			'total_points': h.total_points,
+			'users': [{'username': u.username, 'daily_score': u.daily_score} for u in users]
+		})
 	user_id = session.get('user_id')
 	user_streak = None
 	if user_id:
