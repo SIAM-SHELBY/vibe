@@ -288,9 +288,12 @@ def quiz_page():
 	if request.method == 'POST' and index < len(questions):
 		answer = request.form.get('answer')
 		if answer is None:
-			# No answer submitted, redisplay question
+			if request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.is_json:
+				return jsonify({'error': 'Please select an answer.'}), 400
+			# No answer submitted, redisplay question (for normal form fallback)
 			question = questions[index]
 			return render_template('quiz.html', question=question, index=index, score=score, message="Please select an answer.")
+		
 		# get correct answer from stored answers list
 		answers = session.get('quiz_answers', [])
 		correct = answers[index] if index < len(answers) else None
@@ -299,6 +302,7 @@ def quiz_page():
 			score = session['quiz_score']
 		session['quiz_index'] = index + 1
 		index = session['quiz_index']
+		
 		# If quiz is complete after this answer
 		if index == len(questions):
 			user = User.query.get(user_id)
@@ -310,13 +314,29 @@ def quiz_page():
 				house.total_points += score
 			db.session.commit()
 			announcement = f"{score} points to {user.house}! — awarded by Professor Dumbledore to {user.username}"
+			
 			# Reset quiz session
 			session.pop('quiz_questions', None)
 			session.pop('quiz_index', None)
 			session.pop('quiz_score', None)
+			
+			if request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.is_json:
+				return jsonify({
+					'complete': True,
+					'announcement': announcement,
+					'score': score
+				})
 			return render_template('quiz.html', announcement=announcement, score=score)
 
-	# Show next question or announcement
+		if request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.is_json:
+			return jsonify({
+				'complete': False,
+				'question': questions[index],
+				'index': index,
+				'score': score
+			})
+
+	# Show next question or announcement (GET request)
 	if index < len(questions):
 		question = questions[index]
 		return render_template('quiz.html', question=question, index=index, score=score)

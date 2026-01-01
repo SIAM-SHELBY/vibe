@@ -16,11 +16,7 @@
   <input type="submit" value="Seal the Alarm">
 </form>
 
-<form method="post" action="/simulate_alarm" style="margin-top: 10px;">
-  <button type="submit"
-    style="background: var(--gryffindor); border-color: var(--gold); font-size: 0.8rem; padding: 8px;">Simulate Alarm
-    (Test Sound)</button>
-</form>
+{% if message %}
 
 {% if message %}
 <div class="message">

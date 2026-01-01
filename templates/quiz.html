@@ -101,17 +101,90 @@
     // Stop audio on completion
     if (isQuizComplete()) {
         localStorage.removeItem('alarmAudioTime');
-
-        // Auto-redirect to dashboard after 5 seconds
         if (document.querySelector('.message').textContent.includes('points to')) {
-            setTimeout(() => {
-                window.location.href = '/dashboard';
-            }, 5000);
+            setTimeout(() => { window.location.href = '/dashboard'; }, 5000);
         }
+    }
+
+    // --- AJAX Quiz Flow (Fixes Audio Cracking) ---
+    const quizForm = document.getElementById('quiz-form');
+    if (quizForm) {
+        quizForm.addEventListener('submit', function (e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            const submitBtn = this.querySelector('input[type="submit"]');
+            submitBtn.disabled = true;
+            submitBtn.value = "Casting... ✨";
+
+            fetch('/quiz', {
+                method: 'POST',
+                body: formData,
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.complete) {
+                        // Stop audio and show final screen
+                        if (alarmAudio) {
+                            alarmAudio.pause();
+                            localStorage.removeItem('alarmAudioTime');
+                        }
+                        document.getElementById('quiz-box').innerHTML = `
+                        <h1>Morning Trials</h1>
+                        <div class="message" style="font-size: 1.2rem; border-color: var(--gold); animation: fadeIn 0.5s;">${data.announcement}</div>
+                        <div style="text-align: center; margin: 30px 0;">
+                            <div style="font-family: 'Cinzel', serif; font-size: 0.8rem; text-transform: uppercase; color: #777;">Final Performance</div>
+                            <div style="font-size: 3rem; font-weight: 700; color: #3d2b1f;">${data.score}</div>
+                        </div>
+                        <a href="/dashboard" class="btn">Return to Common Room</a>
+                    `;
+                        setTimeout(() => { window.location.href = '/dashboard'; }, 5000);
+                    } else {
+                        // Update to next question
+                        const qIndex = data.index + 1;
+                        document.getElementById('quiz-box').querySelector('h2').textContent = `Question ${qIndex} of 5`;
+                        const formContent = document.getElementById('quiz-form');
+                        formContent.querySelector('div').textContent = data.question.question;
+
+                        let optionsHtml = '';
+                        data.question.options.forEach(opt => {
+                            optionsHtml += `
+                            <label style="display: flex; align-items: center; cursor: pointer; padding: 10px; background: rgba(0,0,0,0.03); border: 1px solid rgba(0,0,0,0.1); transition: 0.2s;">
+                                <input type="radio" name="answer" value="${opt}" required style="width: auto; margin: 0 15px 0 0;">
+                                <span style="font-size: 1.1rem;">${opt}</span>
+                            </label>
+                        `;
+                        });
+                        formContent.querySelector('div:nth-of-type(2)').innerHTML = optionsHtml;
+                        submitBtn.disabled = false;
+                        submitBtn.value = "Cast Spell (Submit)";
+
+                        // Update score display
+                        document.getElementById('quiz-box').querySelector('span').textContent = `Current Score: ${data.score}`;
+                    }
+                })
+                .catch(err => {
+                    console.error("Quiz Error:", err);
+                    submitBtn.disabled = false;
+                    submitBtn.value = "Try Again";
+                });
+        });
     }
 </script>
 
 <style>
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
     label:hover {
         background: rgba(0, 0, 0, 0.08) !important;
         border-color: var(--gold) !important;
