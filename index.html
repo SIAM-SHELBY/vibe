@@ -16,8 +16,9 @@
         <!-- Section: House Selection -->
         <div id="section-house" class="hidden">
             <h1>Welcome to Hogwarts</h1>
-            <p class="message">"The Sorting Hat will now decide your fate..."</p>
+            <p class="message">"State your name and the Sorting Hat will decide your fate..."</p>
             <form id="house-form">
+                <input type="text" id="user-name-input" placeholder="Your Name (e.g. Harry Potter)" required>
                 <select id="house-select" required>
                     <option value="" disabled selected>Select Your House</option>
                     <option value="Gryffindor">Gryffindor</option>
@@ -33,7 +34,12 @@
         <div id="section-dashboard" class="hidden">
             <h1>Hogwarts Dashboard</h1>
             <div style="text-align: center; margin-bottom: 20px;">
-                <span id="user-info" class="cinzel" style="font-weight: bold;"></span>
+                <span id="user-info" class="cinzel" style="font-weight: bold; font-size: 1.4rem;"></span>
+            </div>
+
+            <div id="dashboard-members-summary"
+                style="margin: 20px 0; font-size: 0.95rem; border: 1px dashed rgba(0,0,0,0.1); padding: 10px;">
+                <!-- Summary of house counts -->
             </div>
 
             <hr>

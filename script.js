@@ -23,12 +23,12 @@ const QUIZ_QUESTIONS = [
 ];
 
 // --- State Management ---
+// We store 'hp_users' as an array of objects: { name, house, points }
+// We store 'hp_current_user_name' as the key to the current active profile
 let state = {
-    house: localStorage.getItem('hp_house') || null,
+    currentUser: null,
+    allUsers: JSON.parse(localStorage.getItem('hp_users')) || [],
     alarmTime: localStorage.getItem('hp_alarm_time') || null,
-    scores: JSON.parse(localStorage.getItem('hp_scores')) || {
-        Gryffindor: 0, Slytherin: 0, Ravenclaw: 0, Hufflepuff: 0
-    },
     currentQuiz: null,
     isAlarmActive: false
 };
@@ -46,7 +46,12 @@ const audio = document.getElementById('alarm-audio');
 
 // --- Initialization ---
 function init() {
-    if (!state.house) {
+    const savedName = localStorage.getItem('hp_current_user_name');
+    if (savedName) {
+        state.currentUser = state.allUsers.find(u => u.name === savedName);
+    }
+
+    if (!state.currentUser) {
         showSection('house');
     } else {
         showSection('dashboard');
@@ -61,20 +66,51 @@ function showSection(name) {
     sections[name].classList.remove('hidden');
 }
 
-// --- House Selection ---
+// --- House Selection / "Login" ---
 document.getElementById('house-form').addEventListener('submit', (e) => {
     e.preventDefault();
+    const name = document.getElementById('user-name-input').value.trim();
     const house = document.getElementById('house-select').value;
-    state.house = house;
-    localStorage.setItem('hp_house', house);
+
+    if (!name) return;
+
+    // Check if user already exists
+    let user = state.allUsers.find(u => u.name.toLowerCase() === name.toLowerCase());
+
+    if (user) {
+        // Just update house if they picked a different one (sorting hat is flexible)
+        user.house = house;
+    } else {
+        // Create new student
+        user = { name: name, house: house, points: 0 };
+        state.allUsers.push(user);
+    }
+
+    state.currentUser = user;
+    localStorage.setItem('hp_current_user_name', user.name);
+    localStorage.setItem('hp_users', JSON.stringify(state.allUsers));
+
     showSection('dashboard');
     updateDashboard();
 });
 
 // --- Dashboard ---
 function updateDashboard() {
-    document.getElementById('user-info').textContent = `Witch/Wizard of House ${state.house}`;
-    document.getElementById('user-info').className = state.house.toLowerCase();
+    const user = state.currentUser;
+    document.getElementById('user-info').textContent = `${user.name} of House ${user.house}`;
+    document.getElementById('user-info').className = `cinzel ${user.house.toLowerCase()}`;
+
+    // Summary of house counts
+    const summaryCont = document.getElementById('dashboard-members-summary');
+    const counts = { Gryffindor: 0, Slytherin: 0, Ravenclaw: 0, Hufflepuff: 0 };
+    state.allUsers.forEach(u => counts[u.house]++);
+
+    summaryCont.innerHTML = '<strong>Hogwarts Directory:</strong><br>';
+    Object.entries(counts).forEach(([h, count]) => {
+        if (count > 0) {
+            summaryCont.innerHTML += `<span class="${h.toLowerCase()}">${h}</span>: ${count} student(s) `;
+        }
+    });
 
     const status = document.getElementById('alarm-status');
     if (state.alarmTime) {
@@ -93,8 +129,8 @@ document.getElementById('alarm-form').addEventListener('submit', (e) => {
 });
 
 document.getElementById('logout-btn').addEventListener('click', () => {
-    localStorage.removeItem('hp_house');
-    state.house = null;
+    localStorage.removeItem('hp_current_user_name');
+    state.currentUser = null;
     showSection('house');
 });
 
@@ -104,9 +140,9 @@ function startAlarmPoller() {
         if (!state.alarmTime || state.isAlarmActive) return;
 
         const now = new Date();
-        const currentTIme = now.getHours().toString().padStart(2, '0') + ":" + now.getMinutes().toString().padStart(2, '0');
+        const currentTime = now.getHours().toString().padStart(2, '0') + ":" + now.getMinutes().toString().padStart(2, '0');
 
-        if (currentTIme === state.alarmTime) {
+        if (currentTime === state.alarmTime) {
             triggerAlarm();
         }
     }, 5000);
@@ -119,7 +155,6 @@ function triggerAlarm() {
 
 // --- Quiz Logic ---
 function startQuiz(fromAlarm = false) {
-    // Select 5 random questions
     const shuffled = [...QUIZ_QUESTIONS].sort(() => 0.5 - Math.random());
     state.currentQuiz = {
         questions: shuffled.slice(0, 5),
@@ -143,7 +178,7 @@ function renderQuestion() {
     const q = state.currentQuiz.questions[state.currentQuiz.index];
     document.getElementById('quiz-question-number').textContent = `Question ${state.currentQuiz.index + 1} of 5`;
     document.getElementById('quiz-question-text').textContent = q.question;
-    document.getElementById('quiz-house-name').textContent = `House: ${state.house}`;
+    document.getElementById('quiz-house-name').textContent = `House: ${state.currentUser.house}`;
     document.getElementById('quiz-current-score').textContent = `Score: ${state.currentQuiz.score}`;
 
     const optionsCont = document.getElementById('quiz-options');
@@ -178,9 +213,9 @@ document.getElementById('quiz-form').addEventListener('submit', (e) => {
 function finishQuiz() {
     const score = state.currentQuiz.score;
 
-    // Update local leaderboard
-    state.scores[state.house] += score;
-    localStorage.setItem('hp_scores', JSON.stringify(state.scores));
+    // Update individual user points
+    state.currentUser.points += score;
+    localStorage.setItem('hp_users', JSON.stringify(state.allUsers));
 
     // Stop alarm
     audio.pause();
@@ -188,13 +223,21 @@ function finishQuiz() {
     state.isAlarmActive = false;
 
     document.getElementById('result-score').textContent = score;
-    document.getElementById('result-message').textContent = `${score} points awarded to ${state.house}! — by Albus Dumbledore`;
+    document.getElementById('result-message').textContent = `${score} points awarded to ${state.currentUser.house}! — by Albus Dumbledore`;
 
     showSection('results');
+
+    // Auto-redirect to dashboard after 5 seconds
+    setTimeout(() => {
+        if (sections.results.classList.contains('hidden')) return; // already navigated away
+        showSection('dashboard');
+        updateDashboard();
+    }, 5000);
 }
 
 document.getElementById('result-back-btn').addEventListener('click', () => {
     showSection('dashboard');
+    updateDashboard();
 });
 
 // --- Leaderboard ---
@@ -202,13 +245,34 @@ document.getElementById('view-leaderboard-btn').addEventListener('click', () => 
     const content = document.getElementById('leaderboard-content');
     content.innerHTML = '';
 
-    const sortedHouses = Object.entries(state.scores).sort((a, b) => b[1] - a[1]);
+    const houses = ["Gryffindor", "Slytherin", "Ravenclaw", "Hufflepuff"];
 
-    sortedHouses.forEach(([house, pts]) => {
+    // Calculate house totals
+    const houseTotals = houses.map(h => {
+        const members = state.allUsers.filter(u => u.house === h);
+        const total = members.reduce((sum, u) => sum + u.points, 0);
+        return { name: h, total: total, members: members.sort((a, b) => b.points - a.points) };
+    }).sort((a, b) => b.total - a.total);
+
+    houseTotals.forEach(h => {
+        let memberHtml = '';
+        if (h.members.length > 0) {
+            memberHtml = '<table style="width: 100%; font-size: 0.9rem; margin-top: 5px;">';
+            h.members.forEach(m => {
+                memberHtml += `<tr><td>${m.name}</td><td style="text-align:right;">${m.points} pts</td></tr>`;
+            });
+            memberHtml += '</table>';
+        } else {
+            memberHtml = '<div style="font-size: 0.8rem; font-style: italic; color: #888;">No students yet</div>';
+        }
+
         content.innerHTML += `
-            <div style="display: flex; justify-content: space-between; margin-bottom: 15px; border-bottom: 1px solid rgba(0,0,0,0.1); padding-bottom: 5px;">
-                <h3 class="${house.toLowerCase()}" style="margin: 0;">${house}</h3>
-                <span style="font-weight: bold;">${pts} pts</span>
+            <div style="margin-bottom: 25px; border-bottom: 1px solid rgba(0,0,0,0.1); padding-bottom: 10px;">
+                <div style="display: flex; justify-content: space-between; align-items: baseline;">
+                    <h3 class="${h.name.toLowerCase()}" style="margin: 0;">${h.name}</h3>
+                    <span style="font-weight: bold;">${h.total} pts</span>
+                </div>
+                <div style="padding-left: 10px;">${memberHtml}</div>
             </div>
         `;
     });
